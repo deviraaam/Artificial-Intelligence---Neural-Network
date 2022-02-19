@@ -1,0 +1,108 @@
+#include<stdio.h>
+#include<math.h>
+#include<stdlib.h>
+
+main(void)
+{
+    int i,j,kelas[300],n,k,epoch,ep;
+    float I[13][300],target[270],w[15][15],si[15],h[15],wh[15],SH,c[15],dc,dwh[15],miu,dh[15],dwi[15][15],MSE[15],SSE[15];
+
+    ep=100;
+    miu = 0.1;
+    for(i=0;i<=13; i++)
+    {
+        for(j=1; j<=13; j++)
+        {
+            w[i][j] = rand()%100/99.1938129;
+            //printf("w[%d][%d] = %f\n\n",i,j,w[i][j]);
+        }
+    }
+
+    for(i=0; i<=13; i++)
+    {
+        wh[i] = rand()%100/99.21372819372;
+        //printf("wh[%d] = %f\n",i,wh[i]);
+    }
+
+    freopen("input.txt","r",stdin);//if You want to notepad , with name input.txt
+
+
+    for(epoch=1; epoch<=ep; epoch++)
+    {
+        //printf("//////////EPOCH = %d\\\\\\\\\\\\n");
+        scanf("%d", &n);
+        for( int i= 1; i <= n; i++)
+        {
+            I[0][i] = 1;
+            //printf("I[0][%d] = %f\n",i,I[0][i]);
+            for(j=1; j<=13; j++)
+            {
+                scanf("%f", &I[j][i]);
+                //printf("I[%d][%d] = %f\n",j,i,I[j][i]);
+            }
+            scanf("%f",&target[i]);
+            printf("Target[%d] = %f\n",i,target[i]);
+
+            h[0]= 1;
+            //printf("h[0] = %f\n",h[0]);
+            for(j=1; j<=13; j++)
+            {
+                si[j]=0;
+                for(k=0;k<=13;k++)
+                {
+                    si[j]=si[j] + I[k][i]*w[k][j];
+                }
+                h[j]=1/(1+exp(-si[j]));
+                //printf("si[%d] = %f\nh[%d] = %f\n",j,si[j],j,h[j]);
+            }
+
+            SH=0;
+            for(j=0; j<=13; j++)
+            {
+                SH = SH+(h[j]*wh[j]);
+            }
+            c[i]=1/(1+exp(-SH));
+            printf("SH = %f\nNilai C[%d] = %f\n",SH,i,c[i]);
+
+
+            //printf("\n========BACK PROPAGASI========\n");
+
+            dc = c[i]*(1-c[i])*(target[i]-c[i]);
+            //printf("dc = %f\n",dc);
+
+            for(j=0; j<=13; j++)
+            {
+                dwh[j]=miu*h[j]*dc;
+                wh[j] = wh[j] + dwh[j];
+                //printf("wh[%d] = %f\n",j,wh[j]);
+            }
+
+            for(j=1; j<=13; j++)
+            {
+                dh[j]=h[j]*(1-h[j])*wh[j]*dc;
+                //printf("dh[%d] = %f\n",j,dh[j]);
+            }
+
+            for(j=0; j<=13; j++)
+            {
+                for(k=1; k<=13; k++)
+                {
+                    dwi[j][k]=miu*I[k][i]*dh[k];
+                    w[j][k] = w[j][k] + dwi[j][k];
+                    //printf("w[%d][%d] = %f\n",j,k,w[j][k]);
+                }
+            }printf("==============\n");
+        }
+
+    }
+
+    for(i=1; i<=ep; i++)
+    {
+        for(j=1; j<=n; j++)
+        {
+            MSE[i] = MSE[i] + pow((target[j]-c[i]),2);
+        }
+        MSE[i]=MSE[i]/270;
+        printf("MSE[%d] = %f\n",i,MSE[i]);
+    }
+}
